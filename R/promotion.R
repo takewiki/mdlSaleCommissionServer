@@ -55,7 +55,7 @@ sql <- paste0("SELECT
       ,[FALLAMOUNT] as 价税合计
       ,[FTAXAMOUNT_LC] as 税额本位币
       ,[FAMOUNT_LC] as 金额本位币
-      ,[FALLAMOUNT_LC] as 价税合计本税币
+      ,[FALLAMOUNT_LC] as 价税合计本位币
       ,[FSRCBILLNO] as 源单编号
       ,[FSoBillNo]  as 销售订单编号
       ,[FSoSeq]   as 销售订单行号
