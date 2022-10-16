@@ -53,7 +53,7 @@ sql <- paste0("SELECT
       ,[FTAXAMOUNT] as 税额
       ,[FAMOUNT] as 金额
       ,[FALLAMOUNT] as 价税合计
-      ,[FTAXAMOUNT_LC] as 价税合计本位币
+      ,[FTAXAMOUNT_LC] as 税额本位币
       ,[FAMOUNT_LC] as 金额本位币
       ,[FALLAMOUNT_LC] as 价税合计本税币
       ,[FSRCBILLNO] as 源单编号
