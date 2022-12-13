@@ -1,4 +1,4 @@
-#' 删除DMS中的销售杨文意
+#' 删除DMS中的销售出库
 #'
 #' @param dms_token 口令
 #' @param FStartDate 日期1
@@ -9,18 +9,19 @@
 #' @export
 #'
 #' @examples
-#' dms_saleOutStock_del()
-dms_saleOutStock_del <- function(dms_token='9B6F803F-9D37-41A2-BDA0-70A7179AF0F3',
+#' dms_saleOutStock_mfg_del()
+dms_saleOutStock_mfg_del <- function(dms_token='9B6F803F-9D37-41A2-BDA0-70A7179AF0F3',
                               FStartDate='2022-08-01',
                               FEndDate='2022-08-31',
                               FCompanyName='苏州赛普生物科技有限公司'){
-  sql <- paste0("delete   FROM [dbo].[rds_hr_sales_saleOutStockAll]
+  sql <- paste0("delete   FROM  rds_hr_sales_saleOutStockAll_mfg
   where  FDate >='",FStartDate,"' and FDate<='",FEndDate,"'
   and FSaleOrgName='",FCompanyName,"'")
   tsda::sql_update2(token = dms_token,sql_str = sql)
 
 }
 
+#这个有点意思
 #销售出库
 # 来源表：rds_vw_sales_saleOutStockAll
 # 目标表：rds_hr_sales_saleOutStockAll
@@ -36,8 +37,8 @@ dms_saleOutStock_del <- function(dms_token='9B6F803F-9D37-41A2-BDA0-70A7179AF0F3
 #' @export
 #'
 #' @examples
-#' saleOutStock_erp2dms()
-saleOutStock_erp2dms <- function(erp_token='4D181CAB-4CE3-47A3-8F2B-8AB11BB6A227',
+#' saleOutStock_erp2dms_mfg()
+saleOutStock_erp2dms_mfg <- function(erp_token='4D181CAB-4CE3-47A3-8F2B-8AB11BB6A227',
                               dms_token='9B6F803F-9D37-41A2-BDA0-70A7179AF0F3',
                               FStartDate='2022-08-01',
                               FEndDate='2022-08-31',
@@ -85,7 +86,7 @@ saleOutStock_erp2dms <- function(erp_token='4D181CAB-4CE3-47A3-8F2B-8AB11BB6A227
       ,isnull([FSoId],0) as FSoId,
       F_SZSP_SettleAmt,
       F_SZSP_SettleDate
-  FROM [dbo].rds_vw_sales_saleOutStockAll
+  FROM  rds_vw_sales_saleOutStockAll_mfg
   where  FDate >='",FStartDate,"' and FDate<='",FEndDate,"'
   and FSaleOrgName='",FCompanyName,"'")
   data = tsda::sql_select2(erp_token,sql_erp)
@@ -104,7 +105,7 @@ saleOutStock_erp2dms <- function(erp_token='4D181CAB-4CE3-47A3-8F2B-8AB11BB6A227
       end = page_info[row,'FEnd']
       item = data[start:end, ]
       print(item)
-      tsda::db_writeTable2(token = dms_token,table_name = 'rds_hr_sales_saleOutStockAll',r_object = item,append = T)
+      tsda::db_writeTable2(token = dms_token,table_name = 'rds_hr_sales_saleOutStockAll_mfg',r_object = item,append = T)
     })
 
   }
@@ -115,7 +116,7 @@ saleOutStock_erp2dms <- function(erp_token='4D181CAB-4CE3-47A3-8F2B-8AB11BB6A227
 
 
 
-#' 数据中台订单查询
+#' 数据中台订单查询,其中结算金额需要扣税,已在数据源处扣除了税金
 #'
 #' @param dms_token 口令
 #' @param FStartDate 开始日期
@@ -127,7 +128,7 @@ saleOutStock_erp2dms <- function(erp_token='4D181CAB-4CE3-47A3-8F2B-8AB11BB6A227
 #'
 #' @examples
 #' dms_saleOrder_query()
-dms_saleOutStock_query <- function(dms_token='9B6F803F-9D37-41A2-BDA0-70A7179AF0F3',
+dms_saleOutStock_mfg_query <- function(dms_token='9B6F803F-9D37-41A2-BDA0-70A7179AF0F3',
                                 FStartDate='2022-08-01',
                                 FEndDate='2022-08-31',
                                 FCompanyName='苏州赛普生物科技有限公司') {
@@ -174,7 +175,7 @@ dms_saleOutStock_query <- function(dms_token='9B6F803F-9D37-41A2-BDA0-70A7179AF0
       ,[FSoId]  as 订单内码
       ,F_SZSP_SettleAmt as 结算金额
       ,F_SZSP_SettleDate as 结算日期
-  FROM [dbo].[rds_hr_sales_saleOutStockAll]
+  FROM rds_hr_sales_saleOutStockAll_mfg
   where  FDate >='",FStartDate,"' and FDate<='",FEndDate,"'
   and FSaleOrgName='",FCompanyName,"'")
   data = tsda::sql_select2(token = dms_token,sql = sql)
@@ -184,7 +185,7 @@ dms_saleOutStock_query <- function(dms_token='9B6F803F-9D37-41A2-BDA0-70A7179AF0
 
 
 
-#' 同步销售出库及销售退货数据
+#' 同步销售出库及销售退货数据,生产数据口径
 #'
 #' @param input  输入
 #' @param session 会话
@@ -196,13 +197,13 @@ dms_saleOutStock_query <- function(dms_token='9B6F803F-9D37-41A2-BDA0-70A7179AF0
 #' @export
 #'
 #' @examples
-#' server_saleOutStock_click()
-server_saleOutStock_click <- function(input,output,session,erp_token,dms_token) {
+#' server_saleOutStock_mfg_click()
+server_saleOutStock_mfg_click <- function(input,output,session,erp_token,dms_token) {
 
   #步同按续
-  var_sync_src_saleOutStock_read <-tsui::var_dateRange('sync_src_saleOutStock_read')
-  var_sync_src_saleOutStock_org <- tsui::var_ListChoose1('sync_src_saleOutStock_org')
-  shiny::observeEvent(input$sync_src_saleOutStock_click,{
+  var_sync_src_saleOutStock_read <-tsui::var_dateRange('sync_src_saleOutStock_mfg_read')
+  var_sync_src_saleOutStock_org <- tsui::var_ListChoose1('sync_src_saleOutStock_mfg_org')
+  shiny::observeEvent(input$sync_src_saleOutStock_mfg_click,{
 
     dates = var_sync_src_saleOutStock_read()
     FStartDate = dates[1]
@@ -210,7 +211,7 @@ server_saleOutStock_click <- function(input,output,session,erp_token,dms_token) 
     FCompanyName = var_sync_src_saleOutStock_org()
     #更新数据
     try({
-      saleOutStock_erp2dms(erp_token = erp_token,
+      saleOutStock_erp2dms_mfg(erp_token = erp_token,
                         dms_token = dms_token,
                         FStartDate =FStartDate ,
                         FEndDate =FEndDate ,
@@ -232,7 +233,7 @@ server_saleOutStock_click <- function(input,output,session,erp_token,dms_token) 
 
 
 
-#' 同步出库数据
+#' 同步出库数据,生产成本口径
 #'
 #' @param input  输入
 #' @param output 输出
@@ -243,8 +244,8 @@ server_saleOutStock_click <- function(input,output,session,erp_token,dms_token) 
 #' @export
 #'
 #' @examples
-#' server_saleOrder_click()
-server_saleOutStock_view <- function(input,output,session,dms_token) {
+#' server_saleOutStock_mfg_view()
+server_saleOutStock_mfg_view <- function(input,output,session,dms_token) {
 
   #步同按续
   var_sync_src_saleOutStock_read <-tsui::var_dateRange('sync_src_saleOutStock_read')

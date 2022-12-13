@@ -2,7 +2,7 @@
 % Please edit documentation in R/saleOutReturnStock.R
 \name{server_saleOutStock_click}
 \alias{server_saleOutStock_click}
-\title{同步订单数据}
+\title{同步销售出库及销售退货数据}
 \usage{
 server_saleOutStock_click(input, output, session, erp_token, dms_token)
 }
@@ -21,7 +21,7 @@ server_saleOutStock_click(input, output, session, erp_token, dms_token)
 返回值
 }
 \description{
-同步订单数据
+同步销售出库及销售退货数据
 }
 \examples{
 server_saleOutStock_click()
